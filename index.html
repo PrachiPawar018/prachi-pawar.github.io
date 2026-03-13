@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Prachi Pawar | Future Software Developer</title>
+        <meta
+            name="description"
+            content="Portfolio of Prachi Pawar, a Computer Engineering student specializing in Web and Android Development. Highly animated and interactive tech story."
+        >
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap"
+            rel="stylesheet"
+        >
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body class="dark-theme">
+        <div id="loading-screen" class="loading-screen">
+            <div class="loader-content">
+                <div class="code-terminal">
+                    <span class="command">> sudo compile prachi_portfolio</span>
+                    <span class="cursor">_</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="bg-canvas"></canvas>
+
+        <header>
+            <nav>
+                <div class="logo">PS<span>P</span></div>
+                <ul class="nav-links">
+                    <li><a href="#about" class="nav-item">About</a></li>
+                    <li>
+                        <a href="#experience" class="nav-item">Experience</a>
+                    </li>
+                    <li><a href="#projects" class="nav-item">Projects</a></li>
+                    <li><a href="#contact" class="nav-item">Contact</a></li>
+                </ul>
+                <div class="theme-toggle" id="theme-toggle">
+                    <div class="toggle-circle"></div>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <section id="hero" class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-intro">
+                        <span class="hello">Hello, I'm</span>
+                        <h1
+                            id="hero-name"
+                            class="glitch-text"
+                            data-text="PRACHI SUHAS PAWAR"
+                        >
+                            PRACHI SUHAS PAWAR
+                        </h1>
+                        <h2 class="hero-tagline">
+                            Computer Engineering Student | Future Software
+                            Developer
+                        </h2>
+                        <p id="typing-text" class="typing-text"></p>
+                    </div>
+                    <div class="hero-btns">
+                        <a href="#projects" class="btn btn-primary"
+                        >View Projects</a>
+                        <a href="#contact" class="btn btn-secondary"
+                        >Contact Me</a>
+                    </div>
+                </div>
+                <div class="scroll-indicator">
+                    <div class="mouse"></div>
+                    <span>Scroll to Explore</span>
+                </div>
+            </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <div class="section-header reveal">
+                    <h2 class="section-title">01. <span>About Me</span></h2>
+                    <div class="header-line"></div>
+                </div>
+                <div class="about-grid">
+                    <div class="about-text reveal">
+                        <p>I am a <strong>Diploma Computer Engineering student</strong> with hands-on experience in Web and Android Application Development. I completed a Web Development Internship at Mass Technologies, where I gained practical experience working on real-world projects and professional development workflows.</p>
+                        <p>I have built several academic and technical projects including <strong>SmartMart</strong>, <strong>Student Feedback System</strong>, and <strong>HelpReach</strong>. I enjoy solving real problems using software and continuously improving my technical skills.</p>
+                        
+                        <div class="tech-stack">
+                            <h3>Technologies I work with:</h3>
+                            <div class="tech-icons-grid">
+                                <div class="tech-tag" data-icon="java">Java</div>
+                                <div class="tech-tag" data-icon="c">C</div>
+                                <div class="tech-tag" data-icon="cpp">C++</div>
+                                <div class="tech-tag" data-icon="python">Python</div>
+                                <div class="tech-tag" data-icon="html">HTML</div>
+                                <div class="tech-tag" data-icon="css">CSS</div>
+                                <div class="tech-tag" data-icon="jsp">JSP</div>
+                                <div class="tech-tag" data-icon="mysql">MySQL</div>
+                                <div class="tech-tag" data-icon="android">Android Studio</div>
+                                <div class="tech-tag" data-icon="dsa">DSA</div>
+                                <div class="tech-tag" data-icon="dbms">DBMS</div>
+                                <div class="tech-tag" data-icon="cloud">Cloud Computing</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="about-visual reveal">
+                        <div class="profile-card">
+                            <div class="card-inner">
+                                <div class="card-front">
+                                    <div class="cyber-circle"></div>
+                                    <span class="p-letter">P</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="experience-section">
+            <div class="container">
+                <div class="section-header reveal">
+                    <h2 class="section-title">02. <span>Experience</span></h2>
+                    <div class="header-line"></div>
+                </div>
+                
+                <div class="timeline">
+                    <div class="timeline-item reveal">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="exp-header">
+                                <h3 class="role">Web Development Intern</h3>
+                                <span class="company">Mass Technologies</span>
+                                <span class="date">Jun 2025 – Sep 2025</span>
+                            </div>
+                            <div class="exp-body">
+                                <p>Worked with HTML, CSS, and JavaScript to build responsive web applications. Gained hands-on experience in designing structured layouts, implementing forms, validating user input, and debugging real-world applications.</p>
+                                <p>Understood professional development workflows, teamwork, and problem-solving in real software projects.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="projects" class="projects-section">
+            <div class="container">
+                <div class="section-header reveal">
+                    <h2 class="section-title">03. <span>Projects</span></h2>
+                    <div class="header-line"></div>
+                </div>
+                
+                <div class="projects-grid">
+                    <!-- HelpReach -->
+                    <div class="project-card reveal">
+                        <div class="project-img">
+                            <div class="project-overlay">
+                                <h3>HelpReach</h3>
+                                <p>Reduce Food Waste</p>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <p class="project-desc">A digital platform connecting donors with NGOs to reduce food wastage and improve distribution efficiency.</p>
+                            <ul class="project-features">
+                                <li>Centralized donation system</li>
+                                <li>Organized NGO access</li>
+                                <li>Real-time communication</li>
+                                <li>Transparent tracking</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- SmartMart -->
+                    <div class="project-card reveal">
+                        <div class="project-img">
+                            <div class="project-overlay">
+                                <h3>SmartMart</h3>
+                                <p>QR Based Billing App</p>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <p class="project-desc">Android shopping application that allows users to scan product QR codes, add items to cart, and generate automated bills.</p>
+                            <div class="project-tech-tags">
+                                <span>Java</span>
+                                <span>XML</span>
+                                <span>Razorpay</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MindGuardian -->
+                    <div class="project-card reveal">
+                        <div class="project-img">
+                            <div class="project-overlay">
+                                <h3>MindGuardian</h3>
+                                <p>Mental Wellness Platform</p>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <p class="project-desc">Hackathon project designed to help students manage stress and track their mental well-being through mood tracking and journaling.</p>
+                            <ul class="project-features">
+                                <li>Mood tracking</li>
+                                <li>Journaling</li>
+                                <li>AI insights</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="skills-section">
+            <div class="container">
+                <div class="section-header reveal">
+                    <h2 class="section-title">04. <span>Skills</span></h2>
+                    <div class="header-line"></div>
+                </div>
+                
+                <div class="skills-grid">
+                    <div class="skill-category reveal">
+                        <h3>Programming</h3>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>Java</span>
+                                <span>90%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="90%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>C / C++</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="85%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>Python</span>
+                                <span>75%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="75%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="skill-category reveal">
+                        <h3>Development</h3>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>Web Development</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="85%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>Android Development</span>
+                                <span>80%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="80%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="skill-category reveal">
+                        <h3>Technical Knowledge</h3>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>DSA</span>
+                                <span>80%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="80%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>DBMS</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="85%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-info">
+                                <span>Cloud Computing</span>
+                                <span>70%</span>
+                            </div>
+                            <div class="skill-bar-bg"><div class="skill-bar" data-width="70%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scripts -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"
+        ></script>
+        <script src="script.js"></script>
+    </body>
+</html>
