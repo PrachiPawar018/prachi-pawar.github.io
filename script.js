@@ -1,272 +1,509 @@
 document.addEventListener('DOMContentLoaded', () => {
-    gsap.registerPlugin(ScrollTrigger, TextPlugin);
+    // --- Register GSAP Plugins ---
+    gsap.registerPlugin(ScrollTrigger, TextPlugin, ScrollToPlugin);
 
-    // --- Configuration ---
+    // --- Configuration (v2.1 Spaced Out Order) ---
     const config = {
-        scrollLength: 12000,
-        scenesCount: 8,
-        // Specific user-requested coordinates
-        sceneCoordinates: [
-            { pos: new THREE.Vector3(0, 0, 0), look: new THREE.Vector3(0, 0, -10) },     // Intro
-            { pos: new THREE.Vector3(10, 2, -10), look: new THREE.Vector3(15, 0, -15) },  // About
-            { pos: new THREE.Vector3(20, 4, -20), look: new THREE.Vector3(25, 4, -25) },  // Skills
-            { pos: new THREE.Vector3(30, 8, -30), look: new THREE.Vector3(30, 0, -35) },  // Experience
-            { pos: new THREE.Vector3(45, 10, -40), look: new THREE.Vector3(50, 10, -45) }, // Projects
-            { pos: new THREE.Vector3(60, 12, -50), look: new THREE.Vector3(60, 5, -55) }, // Education
-            { pos: new THREE.Vector3(75, 14, -60), look: new THREE.Vector3(80, 14, -65) }, // Certs
-            { pos: new THREE.Vector3(95, 18, -75), look: new THREE.Vector3(110, 18, -100) } // Contact
+        scrollLength: 15000,
+        cameraPath: [
+            { pos: new THREE.Vector3(0, 10, 100), look: new THREE.Vector3(0, 5, 0) },        // 0: Welcome
+            { pos: new THREE.Vector3(70, 15, -300), look: new THREE.Vector3(100, 5, -350) },  // 1: About
+            { pos: new THREE.Vector3(-100, 25, -700), look: new THREE.Vector3(-20, 15, -750) }, // 2: Skills
+            { pos: new THREE.Vector3(120, 50, -1100), look: new THREE.Vector3(120, 0, -1100) }, // 3: Experience
+            { pos: new THREE.Vector3(250, 20, -1500), look: new THREE.Vector3(300, 15, -1650) }, // 4: Projects
+            { pos: new THREE.Vector3(-200, 40, -1900), look: new THREE.Vector3(-250, 30, -2100) }, // 5: Education
+            { pos: new THREE.Vector3(60, 15, -2300), look: new THREE.Vector3(0, 10, -2500) },    // 6: Certs
+            { pos: new THREE.Vector3(0, 30, -2800), look: new THREE.Vector3(0, 15, -3000) }      // 7: Contact
+        ],
+        zoneColors: [
+            { bg: 0x020617, fog: 0x020617, accent: 0xa855f7 },
+            { bg: 0x020617, fog: 0x0f172a, accent: 0x3b82f6 },
+            { bg: 0x020617, fog: 0x06b6d4, accent: 0x06b6d4 },
+            { bg: 0x020617, fog: 0xa855f7, accent: 0xfb923c },
+            { bg: 0x020617, fog: 0xec4899, accent: 0x3b82f6 },
+            { bg: 0x020617, fog: 0xfbbf24, accent: 0xa855f7 },
+            { bg: 0x020617, fog: 0x0f172a, accent: 0xc084fc },
+            { bg: 0x020617, fog: 0xa855f7, accent: 0xec4899 }
         ]
     };
 
-    // --- Three.js Setup ---
+    // --- Core Three.js Setup ---
     const container = document.getElementById('three-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020617);
-    scene.fog = new THREE.FogExp2(0x020617, 0.01);
+    scene.background = new THREE.Color(config.zoneColors[0].bg);
+    scene.fog = new THREE.FogExp2(config.zoneColors[0].fog, 0.0008); 
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 8000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ReinhardToneMapping;
+    renderer.toneMappingExposure = 1.0;
     container.appendChild(renderer.domElement);
 
-    // --- Post-Processing (Neon Bloom) ---
-    const renderScene = new THREE.RenderPass(scene, camera);
-    const bloomPass = new THREE.UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
-        1.5, // strength
-        0.4, // radius
-        0.85 // threshold
-    );
-
-    const composer = new THREE.EffectComposer(renderer);
-    composer.addPass(renderScene);
-    composer.addPass(bloomPass);
+    // Initial position
+    camera.position.copy(config.cameraPath[0].pos);
+    camera.lookAt(config.cameraPath[0].look);
 
     // --- Lighting ---
-    const ambientLight = new THREE.AmbientLight(0x404040, 1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+    hemiLight.position.set(0, 300, 0);
+    scene.add(hemiLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(100, 200, 100);
+    scene.add(dirLight);
 
-    const mainLight = new THREE.PointLight(0xa855f7, 2, 100);
-    mainLight.position.set(0, 10, 0);
-    scene.add(mainLight);
-
-    // --- Background: Digital Universe & City Skyline ---
-    function createBackground() {
-        // Particles (Digital Grid)
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
-        for (let i = 0; i < 2000; i++) {
-            vertices.push(THREE.MathUtils.randFloatSpread(500), THREE.MathUtils.randFloatSpread(500), THREE.MathUtils.randFloatSpread(1000));
-        }
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        const material = new THREE.PointsMaterial({ size: 0.7, color: 0x3b82f6, transparent: true, opacity: 0.5 });
-        const stars = new THREE.Points(geometry, material);
-        scene.add(stars);
-
-        // Code City Skyline (Simplified logic buildings)
-        const cityGroup = new THREE.Group();
-        const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-        for (let i = 0; i < 50; i++) {
-            const h = Math.random() * 40 + 10;
-            const building = new THREE.Mesh(
-                boxGeo,
-                new THREE.MeshStandardMaterial({ color: 0x020617, emissive: 0xa855f7, emissiveIntensity: 0.05, wireframe: true })
-            );
-            building.scale.set(5, h, 5);
-            building.position.set(THREE.MathUtils.randFloatSpread(400), h / 2 - 50, THREE.MathUtils.randFloatSpread(800));
-            cityGroup.add(building);
-        }
-        scene.add(cityGroup);
-        return { stars, cityGroup };
-    }
-    const bgWorld = createBackground();
-
-    // --- Camera Curve Path ---
-    const curve = new THREE.CatmullRomCurve3(config.sceneCoordinates.map(c => c.pos));
-    const lookCurve = new THREE.CatmullRomCurve3(config.sceneCoordinates.map(c => c.look));
-
-    // --- Assets Generators ---
-    const createGlassPanel = (pos, color = 0x06b6d4) => {
-        const group = new THREE.Group();
-        const plane = new THREE.Mesh(
-            new THREE.PlaneGeometry(8, 5),
-            new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.2, side: THREE.DoubleSide })
-        );
-        group.add(plane);
-        const edges = new THREE.EdgesGeometry(plane.geometry);
-        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
-        group.add(line);
-        group.position.copy(pos);
-        scene.add(group);
-        return group;
-    };
-
-    // --- Zone Implementation ---
-    // Zone 1: Floating code snippets
-    const codeSnippets = [];
-    for(let i=0; i<15; i++) {
-        const snippet = createGlassPanel(new THREE.Vector3(Math.random()*20-10, Math.random()*10-5, Math.random()*-20), 0xa855f7);
-        snippet.scale.set(0.2, 0.2, 0.2);
-        codeSnippets.push(snippet);
-    }
-
-    // Zone 2: About Hub
-    const aboutPanel = createGlassPanel(new THREE.Vector3(15, 0, -15), 0x3b82f6);
-    aboutPanel.rotation.y = -Math.PI / 4;
-
-    // Zone 3: Skills Planet
-    const skillsGroup = new THREE.Group();
-    skillsGroup.position.set(25, 4, -25);
-    const coreSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(2, 32, 32),
-        new THREE.MeshStandardMaterial({ color: 0x06b6d4, wireframe: true, emissive: 0x06b6d4, emissiveIntensity: 1 })
-    );
-    skillsGroup.add(coreSphere);
-    
-    const skills = ['JAVA', 'PYTHON', 'ANDROID', 'WEB', 'C++', 'SQL', 'DSA', 'CLOUD'];
-    const orbitalIcons = [];
-    skills.forEach((skill, i) => {
-        const icon = createGlassPanel(new THREE.Vector3(0,0,0), 0x06b6d4);
-        icon.scale.set(0.15, 0.1, 0.1);
-        const angle = (i / skills.length) * Math.PI * 2;
-        icon.position.set(Math.cos(angle) * 5, Math.sin(angle) * 5, 0);
-        skillsGroup.add(icon);
-        orbitalIcons.push(icon);
-    });
-    scene.add(skillsGroup);
-
-    // Zone 4: Experience Tower
-    const towerGeo = new THREE.CylinderGeometry(2, 3, 40, 6, 1, true);
-    const tower = new THREE.Mesh(towerGeo, new THREE.MeshStandardMaterial({ color: 0xa855f7, wireframe: true, emissive: 0xa855f7, emissiveIntensity: 0.5 }));
-    tower.position.set(30, 0, -35);
-    scene.add(tower);
-
-    // Zone 5: Projects Lab
-    const labs = [
-        createGlassPanel(new THREE.Vector3(50, 10, -45), 0x06b6d4),
-        createGlassPanel(new THREE.Vector3(55, 12, -50), 0x3b82f6),
-        createGlassPanel(new THREE.Vector3(60, 8, -40), 0xa855f7)
+    // Zone-specific lights
+    const zoneLights = [
+        new THREE.PointLight(0xa855f7, 2, 500), // Welcome
+        new THREE.PointLight(0x3b82f6, 2, 500), // About
+        new THREE.PointLight(0x06b6d4, 3, 600), // Skills
+        new THREE.PointLight(0xfb923c, 2, 500), // Experience
+        new THREE.PointLight(0x3b82f6, 3, 700), // Projects
+        new THREE.PointLight(0xfbbf24, 2, 500), // Education
+        new THREE.PointLight(0xc084fc, 3, 600), // Certs
+        new THREE.PointLight(0xec4899, 4, 800)  // Contact
     ];
+    zoneLights.forEach((light, i) => {
+        light.position.copy(config.cameraPath[i].pos);
+        scene.add(light);
+    });
 
-    // Zone 8: Contact Portal
-    const portalGeo = new THREE.TorusGeometry(8, 0.5, 16, 100);
-    const portal = new THREE.Mesh(portalGeo, new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 5 }));
-    portal.position.set(110, 18, -100);
-    portal.lookAt(config.sceneCoordinates[7].pos);
+    // --- Guide Robot ---
+    class RobotGirl {
+        constructor() {
+            this.group = new THREE.Group();
+            
+            const bodyGeo = new THREE.SphereGeometry(0.6, 32, 32);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xc084fc, emissive: 0xa855f7, emissiveIntensity: 0.8 });
+            this.body = new THREE.Mesh(bodyGeo, bodyMat);
+            this.group.add(this.body);
+
+            const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+            const eyeMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 3 });
+            [-0.2, 0.2].forEach(x => {
+                const eye = new THREE.Mesh(eyeGeo, eyeMat);
+                eye.position.set(x, 0.2, 0.5);
+                this.group.add(eye);
+            });
+
+            const wingGeo = new THREE.PlaneGeometry(0.6, 1.2);
+            const wingMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, side: THREE.DoubleSide, transparent: true, opacity: 0.5, emissive: 0x3b82f6 });
+            this.leftWing = new THREE.Mesh(wingGeo, wingMat);
+            this.leftWing.position.set(-1.1, 0, 0);
+            this.leftWing.rotation.y = -Math.PI/4;
+            this.group.add(this.leftWing);
+
+            this.rightWing = this.leftWing.clone();
+            this.rightWing.position.set(1.1, 0, 0);
+            this.rightWing.rotation.y = Math.PI/4;
+            this.group.add(this.rightWing);
+
+            this.symbols = new THREE.Group();
+            const symbolChars = ['<', '>', '{', '}', '/', '*', '+', '='];
+            symbolChars.forEach((char, i) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 64; canvas.height = 64;
+                ctx.fillStyle = '#06b6d4'; ctx.font = 'bold 44px Orbitron';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(char, 32, 32);
+                const tex = new THREE.CanvasTexture(canvas);
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.7 }));
+                sprite.scale.set(0.5, 0.5, 1);
+                const angle = (i / symbolChars.length) * Math.PI * 2;
+                sprite.position.set(Math.cos(angle) * 1.8, Math.sin(angle) * 1.8, 0);
+                this.symbols.add(sprite);
+            });
+            this.group.add(this.symbols);
+            scene.add(this.group);
+        }
+
+        update(time, targetPos, targetLook) {
+            this.group.position.lerp(targetPos, 0.08);
+            this.group.position.y += Math.sin(time * 1.5) * 0.2;
+            this.group.lookAt(targetLook);
+            this.symbols.rotation.z += 0.03;
+            this.body.rotation.y += 0.015;
+            this.leftWing.rotation.y = -Math.PI/4 + Math.sin(time * 4) * 0.3;
+            this.rightWing.rotation.y = Math.PI/4 - Math.sin(time * 4) * 0.3;
+        }
+    }
+    const guide = new RobotGirl();
+
+    // --- Environment Elements (v2.1 In Order) ---
+    function createEnchantedWorld() {
+        const starsCount = 4000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(starsCount * 3);
+        const colors = new Float32Array(starsCount * 3);
+        for(let i=0; i<starsCount; i++) {
+            positions[i*3] = THREE.MathUtils.randFloatSpread(8000);
+            positions[i*3+1] = THREE.MathUtils.randFloatSpread(4000);
+            positions[i*3+2] = THREE.MathUtils.randFloatSpread(10000);
+            const color = new THREE.Color().setHSL(Math.random() * 0.1 + 0.5, 0.8, 0.9);
+            colors[i*3] = color.r; colors[i*3+1] = color.g; colors[i*3+2] = color.b;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        scene.add(new THREE.Points(geometry, new THREE.PointsMaterial({ size: 2, vertexColors: true, transparent: true, opacity: 0.8 })));
+
+        const grid = new THREE.GridHelper(10000, 100, 0x06b6d4, 0x020617);
+        grid.position.y = -30;
+        grid.material.transparent = true; grid.material.opacity = 0.1;
+        scene.add(grid);
+
+        // Floating Code Symbols
+        const codeSymbols = ['< >', '{ }', '[ ]', '( )', '//', '/* */', 'if', 'for', 'class', 'function', 'import', 'export', 'const', 'let', 'var'];
+        const floatingSymbols = new THREE.Group();
+        codeSymbols.forEach((symbol, i) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 128; canvas.height = 64;
+            ctx.fillStyle = '#06b6d4'; ctx.font = 'bold 32px Orbitron';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(symbol, 64, 32);
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.6 }));
+            sprite.scale.set(2, 1, 1);
+            const angle = (i / codeSymbols.length) * Math.PI * 2;
+            const radius = 200 + Math.random() * 300;
+            sprite.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius + Math.random() * 200 - 100, Math.sin(angle * 2) * radius);
+            floatingSymbols.add(sprite);
+        });
+        scene.add(floatingSymbols);
+
+        // Glowing Particles
+        const particlesCount = 2000;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesPositions = new Float32Array(particlesCount * 3);
+        for(let i=0; i<particlesCount; i++) {
+            particlesPositions[i*3] = THREE.MathUtils.randFloatSpread(6000);
+            particlesPositions[i*3+1] = THREE.MathUtils.randFloatSpread(3000);
+            particlesPositions[i*3+2] = THREE.MathUtils.randFloatSpread(8000);
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
+        const particlesMaterial = new THREE.PointsMaterial({ color: 0xa855f7, size: 1, transparent: true, opacity: 0.4 });
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+    }
+    createEnchantedWorld();
+
+    // --- Theme Objects ---
+    const clouds = new THREE.Group();
+    for(let i=0; i<30; i++) {
+        const c = new THREE.Mesh(new THREE.SphereGeometry(10, 20, 20), new THREE.MeshStandardMaterial({ color: 0xa855f7, transparent: true, opacity: 0.15 }));
+        c.position.set(THREE.MathUtils.randFloatSpread(400), 20, THREE.MathUtils.randFloat(0, 200));
+        c.scale.set(4, 0.5, 3);
+        clouds.add(c);
+    }
+    scene.add(clouds);
+
+    const techPlanet = new THREE.Group();
+    techPlanet.position.copy(config.cameraPath[2].look);
+    techPlanet.add(new THREE.Mesh(new THREE.SphereGeometry(30, 32, 32), new THREE.MeshStandardMaterial({ color: 0x06b6d4, wireframe: true, emissive: 0x3b82f6, emissiveIntensity: 1.2 })));
+    const skillList = ['Java', 'HTML', 'CSS', 'JS', 'JSP', 'MySQL', 'Android', 'GitHub'];
+    skillList.forEach((skill, i) => {
+        const sphere = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 16), new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0xa855f7, emissiveIntensity: 2 }));
+        const angle = (i / skillList.length) * Math.PI * 2;
+        sphere.position.set(Math.cos(angle) * 60, Math.sin(angle) * 60, (Math.random()-0.5)*40);
+        
+        // Add skill label
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 128; canvas.height = 64;
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px Orbitron';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(skill, 64, 32);
+        const tex = new THREE.CanvasTexture(canvas);
+        const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 }));
+        label.scale.set(4, 2, 1);
+        label.position.set(0, 10, 0);
+        sphere.add(label);
+        
+        techPlanet.add(sphere);
+    });
+    scene.add(techPlanet);
+
+    const city = new THREE.Group();
+    city.position.copy(config.cameraPath[4].look);
+    const buildings = [
+        { color: 0xec4899, size: [25, 100, 25], pos: [0, 0, 0] },
+        { color: 0x3b82f6, size: [20, 70, 20], pos: [60, 0, -40] },
+        { color: 0x06b6d4, size: [30, 50, 30], pos: [-70, 0, 50] },
+        { color: 0xa855f7, size: [22, 80, 22], pos: [40, 0, 60] }
+    ];
+    buildings.forEach(b => {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(...b.size), new THREE.MeshStandardMaterial({ color: 0x020617, emissive: b.color, wireframe: true }));
+        mesh.position.set(...b.pos);
+        city.add(mesh);
+    });
+    scene.add(city);
+
+    // Academic Symbols
+    const academicSymbols = new THREE.Group();
+    academicSymbols.position.copy(config.cameraPath[5].look);
+    const symbols = ['🎓', '📚', '🏆', '📖', '🔬'];
+    symbols.forEach((symbol, i) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 64; canvas.height = 64;
+        ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(symbol, 32, 32);
+        const tex = new THREE.CanvasTexture(canvas);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.8 }));
+        sprite.scale.set(3, 3, 1);
+        const angle = (i / symbols.length) * Math.PI * 2;
+        sprite.position.set(Math.cos(angle) * 80, Math.sin(angle) * 80 + 30, (Math.random()-0.5)*40);
+        academicSymbols.add(sprite);
+    });
+    scene.add(academicSymbols);
+
+    // Crystal Gallery (Refined)
+    const crystals = new THREE.Group();
+    crystals.position.copy(config.cameraPath[6].look);
+    for(let i=0; i<30; i++) {
+        const type = Math.floor(Math.random() * 3);
+        let geo;
+        if(type === 0) geo = new THREE.OctahedronGeometry(4, 0);
+        else if(type === 1) geo = new THREE.IcosahedronGeometry(4, 0);
+        else geo = new THREE.TetrahedronGeometry(4, 0);
+        
+        const crystal = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ 
+            color: config.zoneColors[6].accent, 
+            emissive: config.zoneColors[6].accent, 
+            emissiveIntensity: 2, 
+            transparent: true, 
+            opacity: 0.8 
+        }));
+        crystal.position.set(THREE.MathUtils.randFloatSpread(250), THREE.MathUtils.randFloatSpread(150), THREE.MathUtils.randFloatSpread(250));
+        crystal.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        crystals.add(crystal);
+    }
+    scene.add(crystals);
+
+    // Portal & Finale Decorations
+    const portal = new THREE.Mesh(new THREE.TorusGeometry(40, 4, 32, 100), new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xec4899, emissiveIntensity: 5 }));
+    portal.position.set(0, 20, -3000);
     scene.add(portal);
 
-    // --- HUD System ---
-    const hudItems = [];
-    function setupHUD() {
-        const itemsData = [
-            { id: 'intro-hud', content: `<h1>PRACHI SUHAS PAWAR</h1><p class="typing-effect" id="hero-typing"></p>`, pos: config.sceneCoordinates[0].look },
-            { id: 'about-hud', content: `<h3>ABOUT_PRACHI</h3><p>Prachi is a Computer Engineering student specializing in Web & Android. Internship at Mass Technologies gained her real software workflow experience. Passionate about solving real-world problems with code.</p>`, pos: new THREE.Vector3(15, 0, -15) },
-            { id: 'skills-hud', content: `<h3>TECH_ARSENAL</h3><p>Java, C++, Python, MySQL, Android Studio, DSA, DBMS, Cloud Computing, Web Dev (HTML/CSS/JS).</p>`, pos: new THREE.Vector3(25, 4, -25) },
-            { id: 'exp-hud', content: `<h3>INTERN_LOG</h3><p><strong>Mass Technologies</strong> (Jun-Sep 2025)<br>Developed responsive web applications and contributed to real software deployment workflows.</p>`, pos: new THREE.Vector3(30, 8, -35) },
-            { id: 'projects-hud', content: `<h3>LAB_PROJECTS</h3><p><strong>HelpReach</strong>: Food redistribution platform.<br><strong>SmartMart</strong>: Android QR billing app.<br><strong>MindGuardian</strong>: Mental wellness tracker.</p>`, pos: new THREE.Vector3(50, 10, -45) },
-            { id: 'edu-hud', content: `<h3>ACADEMIC_BADGE</h3><p>D.D.P Highschool Sarole<br>SSC: 92% (Maharashtra State Board)</p>`, pos: new THREE.Vector3(60, 12, -55) },
-            { id: 'certs-hud', content: `<h3>VERIFIED</h3><p>AI Tools Workshop - Be10x<br>Project Management Certification</p>`, pos: new THREE.Vector3(80, 14, -65) },
-            { id: 'contact-hud', content: `<h3>COLLABORATE</h3><p>Pune, India<br>prachipawar5133@gmail.com</p><div style="margin-top:15px;"><button class="btn btn-neon">LINKEDIN</button></div>`, pos: new THREE.Vector3(100, 18, -90) }
-        ];
-
-        itemsData.forEach(data => {
-            const div = document.createElement('div');
-            div.id = data.id;
-            div.className = 'hud-item glass-card';
-            div.innerHTML = data.content;
-            if(data.id === 'intro-hud') div.className = 'hud-item hero-hud';
-            document.getElementById('hud-overlay').appendChild(div);
-            hudItems.push({ element: div, pos: data.pos });
-        });
+    // Light Beams
+    const lightBeams = new THREE.Group();
+    for(let i=0; i<8; i++) {
+        const beam = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 200, 8), new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0xa855f7, emissiveIntensity: 3, transparent: true, opacity: 0.3 }));
+        beam.position.set(Math.cos((i/8)*Math.PI*2) * 60, 100, -3000 + Math.sin((i/8)*Math.PI*2) * 60);
+        beam.rotation.z = Math.PI / 2;
+        lightBeams.add(beam);
     }
-    setupHUD();
+    scene.add(lightBeams);
 
-    // --- Animation & Scroll Logic ---
+    // Finale "Sparkles" (Interesting Thing!)
+    const sparkles = new THREE.Group();
+    for(let i=0; i<150; i++) {
+        const p = new THREE.Mesh(new THREE.IcosahedronGeometry(0.6, 0), new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 3 }));
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 50 + Math.random() * 30;
+        p.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius + 20, -3000 + (Math.random()-0.5)*100);
+        sparkles.add(p);
+    }
+    scene.add(sparkles);
+
+    const curve = new THREE.CatmullRomCurve3(config.cameraPath.map(c => c.pos));
+    const lookCurve = new THREE.CatmullRomCurve3(config.cameraPath.map(c => c.look));
+
+    const hudItems = [];
+    const data = [
+        { title: 'WELCOME SKY ISLAND', content: '<strong>Prachi Suhas Pawar</strong><br>Java Full Stack Developer | Student at Zeal Polytechnic Pune.<br><br>Exploring the intersection of logic and creativity through code.', pos: config.cameraPath[0].look },
+        { title: 'HOLOGRAPHIC GARDEN', content: 'I specialize in Java environments, building scalable tools and Android apps. My goal is to craft digital experiences that solve real-world problems.', pos: config.cameraPath[1].look },
+        { title: 'SKILLS PLANET', content: '<strong>Dominant Skills:</strong><br>• Core Java, JSP, Spring Basics<br>• HTML, CSS, JavaScript (ES6+)<br>• MySQL, DBMS Optimization<br>• Android Studio & Git Workflow', pos: config.cameraPath[2].look },
+        { title: 'EXPERIENCE DATA SPIRE', content: '<strong>Mass Technologies (Intern)</strong><br>Jun 2025 - Sep 2025<br>Building responsive web applications and refining technical workflows in an agile environment.', pos: config.cameraPath[3].look },
+        { title: 'PROJECT NEON CITY', content: '<div class="project-grid"><div class="project-card"><h4>SmartMart App</h4><p>QR-based shopping application that scans products, adds them to a cart, and generates a bill with payment integration.</p><small>Tech: Java, Android Studio, XML</small></div><div class="project-card"><h4>Student Feedback System</h4><p>Web-based feedback system where students can submit feedback and administrators can view reports.</p><small>Tech: JSP, HTML, CSS, JDBC, MySQL</small></div><div class="project-card"><h4>Messcode Website</h4><p>A platform where users can search nearby mess services, view menus, and register as mess owners or customers.</p><small>Tech: JSP, HTML, CSS, MySQL</small></div><div class="project-card"><h4>HelpReach Project</h4><p>A social platform designed to help people connect with support services such as emergency help and donations.</p><small>Tech: Web technologies, Backend integration</small></div></div>', pos: config.cameraPath[4].look },
+        { title: 'ACADEMIC FLOATING ISLE', content: '<strong>Zeal Polytechnic, Pune</strong><br>Diploma in Computer Engineering<br><br><strong>Focus Areas:</strong><br>• Programming and Development<br>• Java, Full Stack Development, Android<br><br><strong>Achievements:</strong><br>• Active participation in hackathons<br>• Technical presentations<br>• Hands-on project development', pos: config.cameraPath[5].look },
+        { title: 'CRYSTAL GALLERY', content: '<div class="cert-grid"><div class="cert-card"><h4>Technical Workshops</h4><p>Attended various technical workshops on advanced programming and development practices.</p></div><div class="cert-card"><h4>Hackathon Participation</h4><p>Participated in multiple hackathons, showcasing problem-solving skills and teamwork.</p></div><div class="cert-card"><h4>Development Projects</h4><p>Completed numerous development projects demonstrating proficiency in Java Full Stack technologies.</p></div><div class="cert-card"><h4>Java Full Stack Learning</h4><p>Continuous learning and progress in Java Full Stack Development, including frameworks and best practices.</p></div></div>', pos: config.cameraPath[6].look },
+        { title: 'THE HEART PORTAL', content: '<div class="final-message"><div class="special-greeting"><h1>✨ THANK YOU FOR VISITING ✨</h1><p class="greeting-text">Your journey through my coding universe has come to an end...</p><p class="greeting-text">But the adventure continues!</p></div><h3>Prachi Suhas Pawar</h3><p>Future Software Engineer</p><div class="contact-info"><div class="contact-item"><span class="icon">📧</span><span>Email: prachipawar5133@gmail.com</span></div><div class="contact-item"><span class="icon">🐙</span><span>GitHub: prachi-pawar</span></div><div class="contact-item"><span class="icon">💼</span><span>LinkedIn: /in/prachipawar</span></div></div><button id="restart-journey-btn" class="btn-restart">Restart Journey</button><div class="auto-restart"><p>Returning to the beginning...</p><div class="loading-bar"><div class="loading-progress"></div></div></div></div>', pos: config.cameraPath[7].look }
+    ];
+
+    data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'hud-item glass-card';
+        div.innerHTML = `<h3>${item.title}</h3><p>${item.content}</p>`;
+        document.getElementById('hud-overlay').appendChild(div);
+        hudItems.push({ element: div, pos: item.pos });
+    });
+
+    let portalTriggered = false;
+
     let scrollProgress = 0;
-    const hudLinks = document.querySelectorAll('#hud-menu li');
+    let isJourneyStarted = false;
 
-    function updateScene() {
-        const t = scrollProgress;
-        const pos = curve.getPoint(t);
-        const look = lookCurve.getPoint(t);
+    const composer = new THREE.EffectComposer(renderer);
+    composer.addPass(new THREE.RenderPass(scene, camera));
+    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.4, 0.8);
+    composer.addPass(bloomPass);
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+        if(isJourneyStarted) return;
+        isJourneyStarted = true;
+        document.getElementById('welcome-screen').classList.add('fade-out');
+        document.getElementById('game-hud').classList.remove('hidden');
+        document.body.style.height = config.scrollLength + 'px';
+        ScrollTrigger.refresh();
+        gsap.to(window, { scrollTo: 100, duration: 2, ease: "power2.inOut" });
+        startAmbient();
+    });
+
+    ScrollTrigger.create({
+        trigger: document.body,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 2,
+        onUpdate: (self) => { if(isJourneyStarted) scrollProgress = self.progress; }
+    });
+
+    function updateWorld(time) {
+        const t = Math.min(Math.max(scrollProgress, 0.0001), 0.999);
+        const targetPos = curve.getPoint(t);
+        const targetLook = lookCurve.getPoint(t);
         
-        camera.position.lerp(pos, 0.1);
-        camera.lookAt(look);
+        // Cinematic Deceleration near zones
+        const activeZone = Math.floor(t * 8);
+        const lerpToZone = (t * 8) % 1;
+        let lerpSpeed = 0.06;
+        if (lerpToZone > 0.8 || lerpToZone < 0.2) lerpSpeed = 0.03; // Slow down near key points
 
-        // Update Active HUD Link
-        const activeZone = Math.min(Math.floor(t * 8), 7);
-        hudLinks.forEach((link, idx) => {
-            link.classList.toggle('active', idx === activeZone);
-        });
+        camera.position.lerp(targetPos, lerpSpeed);
+        camera.lookAt(targetLook);
 
-        // HTML HUD Repositioning
-        const widthHalf = window.innerWidth / 2;
-        const heightHalf = window.innerHeight / 2;
+        const guideTarget = camera.position.clone().add(new THREE.Vector3(4, -2, -15).applyQuaternion(camera.quaternion));
+        guide.update(time, guideTarget, targetLook);
+
+        const lerpFactor = (t * 8) % 1;
+        const c1 = config.zoneColors[activeZone];
+        const c2 = config.zoneColors[Math.min(activeZone + 1, 7)];
         
-        hudItems.forEach(item => {
-            const vector = item.pos.clone();
-            vector.project(camera);
+        if (c1 && c2) scene.fog.color.copy(new THREE.Color(c1.fog).lerp(new THREE.Color(c2.fog), lerpFactor));
+
+        hudItems.forEach((item, i) => {
+            const dist = camera.position.distanceTo(item.pos);
+            const isLookingAt = dist < 700;
+            const isCurrent = (i === activeZone);
             
-            if (vector.z > 1) {
-                item.element.classList.remove('active');
+            if (isCurrent && isLookingAt) {
+                // Position the HUD item in front of the camera, slightly offset towards the target
+                const direction = item.pos.clone().sub(camera.position).normalize();
+                const offsetPos = camera.position.clone().add(direction.multiplyScalar(80));
+                const vector = offsetPos.project(camera);
+                
+                item.element.style.left = `${(vector.x * 0.5 + 0.5) * window.innerWidth}px`;
+                item.element.style.top = `${(-(vector.y * 0.5) + 0.5) * window.innerHeight}px`;
+                item.element.classList.add('active');
             } else {
-                const x = (vector.x * widthHalf) + widthHalf;
-                const y = -(vector.y * heightHalf) + heightHalf;
-                item.element.style.left = `${x}px`;
-                item.element.style.top = `${y}px`;
-
-                const dist = camera.position.distanceTo(item.pos);
-                if (dist < 15 && dist > 1) {
-                    item.element.classList.add('active');
-                } else {
-                    item.element.classList.remove('active');
-                }
+                item.element.classList.remove('active');
             }
+            
+            document.querySelectorAll('#hud-menu li')[i]?.classList.toggle('active', i === activeZone);
         });
+
+        if(t > 0.98 && !portalTriggered) {
+            portalTriggered = true;
+            const progressBar = document.querySelector('.loading-progress');
+            if(progressBar) progressBar.classList.add('started');
+            
+            // Cinematic Portal Sequence
+            setTimeout(() => {
+                // 1. Stronger portal glow handled in animate() via scrollProgress
+                // 2. Stars swirl handled in animate()
+                
+                // 3. Move camera forward through portal
+                gsap.to(camera.position, {
+                    z: -3500,
+                    duration: 3,
+                    ease: "power2.in"
+                });
+
+                // 4. Fade to black
+                setTimeout(() => {
+                    document.body.style.transition = "opacity 1s ease";
+                    document.body.style.opacity = "0";
+                    
+                    // 5. Reset with 1s delay
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        location.reload(); // Hard reset for clean state
+                    }, 1200);
+                }, 2000);
+            }, 1000);
+        }
     }
 
     function animate() {
         requestAnimationFrame(animate);
+        const time = Date.now() * 0.001;
         
-        updateScene();
+        if(isJourneyStarted) {
+            updateWorld(time);
+        } else {
+            camera.position.x = Math.sin(time * 0.4) * 8;
+            camera.lookAt(0, 5, 0);
+        }
+        
+        techPlanet.rotation.y += 0.003;
+        clouds.rotation.y += 0.0004;
+        portal.rotation.z += 0.05;
+        lightBeams.rotation.y += 0.02;
 
-        // Object Animations
-        bgWorld.stars.rotation.y += 0.0002;
-        bgWorld.cityGroup.rotation.y += 0.0001;
-        
-        coreSphere.rotation.y += 0.01;
-        orbitalIcons.forEach((icon, i) => {
-            const time = Date.now() * 0.001;
-            icon.rotation.y += 0.02;
-            icon.position.y += Math.sin(time + i) * 0.005;
+        // Animate academic symbols
+        academicSymbols.rotation.y += 0.005;
+        academicSymbols.children.forEach((symbol, i) => {
+            symbol.position.y += Math.sin(time + i * 0.5) * 0.02;
         });
 
-        tower.rotation.y += 0.005;
-        portal.rotation.z += 0.01;
+        // Animate crystals
+        crystals.rotation.y += 0.003;
+        crystals.children.forEach((crystal, i) => {
+            crystal.rotation.x += 0.01;
+            crystal.rotation.y += 0.01;
+            crystal.position.y += Math.sin(time * 0.5 + i) * 0.01;
+        });
 
+        // Animate floating symbols
+        scene.children.forEach(child => {
+            if (child.type === 'Group' && child.children.length > 10) { // Assuming floatingSymbols group
+                child.rotation.y += 0.001;
+                child.children.forEach((symbol, i) => {
+                    if (symbol.type === 'Sprite') {
+                        symbol.position.y += Math.sin(time + i) * 0.01;
+                        symbol.material.opacity = 0.6 + Math.sin(time * 2 + i) * 0.2;
+                    }
+                });
+            }
+        });
+
+        // Animate Finale Sparkles
+        sparkles.children.forEach((s, i) => {
+            s.rotation.x += 0.02;
+            s.position.y += Math.sin(time + i) * 0.05;
+        });
+
+        // Special Guide Pulse at Finale
+        if(scrollProgress > 0.95) {
+            const pulse = 1 + Math.sin(time * 10) * 0.1;
+            guide.group.scale.set(pulse, pulse, pulse);
+        } else {
+            guide.group.scale.set(1, 1, 1);
+        }
+
+        // Guide Interaction: Point towards active content
+        if (activeZone >= 0 && activeZone < hudItems.length) {
+            const target = hudItems[activeZone].pos;
+            guide.group.lookAt(target);
+        }
+        
         composer.render();
     }
-
-    // --- Interaction ---
-    ScrollTrigger.create({
-        trigger: "#scroll-track",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.5,
-        onUpdate: (self) => {
-            scrollProgress = self.progress;
-        }
-    });
-
-    hudLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            const zone = parseInt(link.dataset.zone);
-            const targetPos = (zone / 7) * (document.body.scrollHeight - window.innerHeight);
-            window.scrollTo({ top: targetPos, behavior: 'smooth' });
-        });
-    });
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -275,10 +512,16 @@ document.addEventListener('DOMContentLoaded', () => {
         composer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Initial Fade In
-    gsap.delayedCall(1, () => {
-        gsap.to("#hero-typing", { text: "Computer Engineering Student | Aspiring Software Developer", duration: 3, ease: "none" });
+    animate();
+
+        });
     });
 
-    animate();
+    // Restart Button Handler
+    document.addEventListener('click', (e) => {
+        if(e.target.id === 'restart-journey-btn') {
+            gsap.to(window, { scrollTo: 0, duration: 2, ease: "power2.inOut" });
+            setTimeout(() => location.reload(), 2100);
+        }
+    });
 });

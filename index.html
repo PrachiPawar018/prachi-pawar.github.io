@@ -3,37 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prachi Pawar | Cinematic Motion Portfolio</title>
-    <meta name="description" content="Cinematic motion-driven developer portfolio of Prachi Suhas Pawar.">
+    <title>Prachi Pawar | 3D Fantasy Coding Journey</title>
+    <meta name="description" content="An interactive 3D animated journey through the coding universe of Prachi Suhas Pawar.">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&family=Space+Grotesk:wght@300;500;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-theme">
+    <!-- Welcome / Start Screen -->
+    <div id="welcome-screen">
+        <div class="welcome-content">
+            <h1 class="glitch-text" data-text="PRACHI SUHAS PAWAR">PRACHI SUHAS PAWAR</h1>
+            <p class="subtitle">Computer Engineering Student | Future Software Developer</p>
+            <button id="start-btn" class="btn btn-primary-glow">Start Journey</button>
+        </div>
+    </div>
+
     <!-- Three.js Scene Container -->
     <div id="three-container"></div>
 
     <!-- HUD Overlay for text/info that moves with 3D elements -->
     <div id="hud-overlay"></div>
 
-    <!-- Game-Style HUD Navigation -->
-    <nav id="game-hud">
-        <ul id="hud-menu">
-            <li data-zone="0"><span>01</span> INTRO</li>
-            <li data-zone="1"><span>02</span> ABOUT</li>
-            <li data-zone="2"><span>03</span> SKILLS</li>
-            <li data-zone="3"><span>04</span> HISTORY</li>
-            <li data-zone="4"><span>05</span> PROJECTS</li>
-            <li data-zone="5"><span>06</span> ACADEMIC</li>
-            <li data-zone="6"><span>07</span> VAULT</li>
-            <li data-zone="7"><span>08</span> PORTAL</li>
-        </ul>
-    </nav>
+  <!-- Game-Style HUD Navigation -->
+
+<nav id="game-hud" class="hidden">
+<div class="hud-header">
+    <h2>MISSION MAP</h2>
+    <p>Explore the Developer World</p>
+</div>
+
+<ul id="hud-menu">
+    <li data-zone="0">
+        <span>01</span> SKY ISLAND  
+        <p>Welcome to Prachi Pawar's digital universe. Discover the journey of a passionate developer.</p>
+    </li>
+
+    <li data-zone="1">
+        <span>02</span> HOLOGRAPHIC GARDEN  
+        <p>Learn about my background, interests, and the inspiration behind my coding journey.</p>
+    </li>
+
+    <li data-zone="2">
+        <span>03</span> TECH PLANET  
+        <p>Explore the technologies and programming skills powering my development world.</p>
+    </li>
+
+    <li data-zone="3">
+        <span>04</span> DATA SPIRE  
+        <p>Follow my learning path, technical experiences, and growth as a developer.</p>
+    </li>
+
+    <li data-zone="4">
+        <span>05</span> NEON CITY  
+        <p>Step into the city of innovation and explore the projects I have built.</p>
+    </li>
+
+    <li data-zone="5">
+        <span>06</span> ACADEMIC ISLE  
+        <p>Discover my academic journey and the foundation of my technical knowledge.</p>
+    </li>
+
+    <li data-zone="6">
+        <span>07</span> CRYSTAL GALLERY  
+        <p>View achievements, certifications, and milestones from my learning journey.</p>
+    </li>
+
+    <li data-zone="7">
+        <span>08</span> PORTAL TEMPLE  
+        <p>Connect with me, explore contact information, and continue the journey together.</p>
+    </li>
+</ul>
+</nav>
+
 
     <!-- Master Scene Track (keep data for JS to use) -->
     <div id="scroll-track"></div>
