@@ -247,6 +247,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     scene.add(techPlanet);
 
+    // --- Data Spire (Experience) ---
+    const dataSpire = new THREE.Group();
+    dataSpire.position.copy(config.cameraPath[3].look);
+    
+    // Add Data Spire Main Panel
+    const dsCanvas = document.createElement('canvas');
+    const dsCtx = dsCanvas.getContext('2d');
+    dsCanvas.width = 512; dsCanvas.height = 256;
+    dsCtx.shadowColor = '#ffffff'; dsCtx.shadowBlur = 30; // Strong white glow for contrast
+    dsCtx.fillStyle = '#ffffff'; dsCtx.font = 'bold 64px Orbitron';
+    dsCtx.textAlign = 'center'; dsCtx.textBaseline = 'middle';
+    dsCtx.fillText('DATA SPIRE', 256, 128);
+    const dsTex = new THREE.CanvasTexture(dsCanvas);
+    const dataSpirePanel = new THREE.Sprite(new THREE.SpriteMaterial({ 
+        map: dsTex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+    }));
+    dataSpirePanel.scale.set(100, 50, 1); // Increased scale
+    // Position slightly forward from the camera path look target so it is right in front
+    dataSpirePanel.position.set(0, 30, 40); 
+    dataSpire.add(dataSpirePanel);
+    
+    const spireCore = new THREE.Mesh(new THREE.CylinderGeometry(0, 10, 80, 8), new THREE.MeshStandardMaterial({ color: 0x020617, emissive: 0x3b82f6, wireframe: true, emissiveIntensity: 2 }));
+    spireCore.position.set(0, -10, -20);
+    dataSpire.add(spireCore);
+    
+    scene.add(dataSpire);
+
     const city = new THREE.Group();
     city.position.copy(config.cameraPath[4].look);
     const projectData = [
@@ -503,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         hudItems.forEach((item, i) => {
             const dist = camera.position.distanceTo(item.pos);
-            const isLookingAt = dist < 1200; // Increased visibility trigger range
+            const isLookingAt = dist < 1600; // Increased visibility trigger range to start earlier
             const isCurrent = (i === activeZone);
             
             if (isCurrent && isLookingAt) {
@@ -608,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
          // Spotlight Effect based on active zone
-         const zoneGroups = [null, techPlanet, techPlanet, techPlanet, city, academicSymbols, crystals, contactIcons];
+         const zoneGroups = [null, techPlanet, techPlanet, dataSpire, city, academicSymbols, crystals, contactIcons];
          zoneGroups.forEach((group, i) => {
              if (group) {
                  const isActive = (i === activeZone);
@@ -623,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
          });
  
          // Camera-Facing Logic & Floating Animation for all info sprites
-         [city, academicSymbols, crystals, contactIcons, techPlanet].forEach(group => {
+         [city, academicSymbols, crystals, contactIcons, techPlanet, dataSpire].forEach(group => {
              group.traverse(child => {
                  if (child.type === 'Sprite') {
                      child.lookAt(camera.position);
