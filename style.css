@@ -75,8 +75,8 @@ body {
 .hud-item.active {
     opacity: 1;
     pointer-events: all;
-    transform: translate(-50%, -50%) scale(1);
-    box-shadow: 0 0 40px rgba(6, 182, 212, 0.4); /* Stronger neon glow */
+    transform: translate(-50%, -50%) scale(1); /* Consistent panel scaling, not too close to camera */
+    box-shadow: 0 0 50px rgba(6, 182, 212, 0.6), 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
 /* Game-Style HUD Navigation (Mission Map) */
@@ -213,16 +213,18 @@ body {
 
 /* Glassmorphism Refined */
 .glass-card {
-    background: rgba(10, 10, 20, 0.85); /* Darker for better contrast */
-    backdrop-filter: blur(12px); /* Increased blur */
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(168, 85, 247, 0.4); /* Neon border */
+    background: rgba(10, 10, 20, 0.9); /* Darker for better contrast against bright 3D objects */
+    backdrop-filter: blur(15px); /* Increased blur */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(168, 85, 247, 0.6); /* Stronger border */
     border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.2);
+    padding: 35px; /* Better spacing */
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(168, 85, 247, 0.4); /* Stronger emissive glow */
+    width: 90vw; /* Fits inside screen */
     max-width: 650px;
+    height: auto; /* Dynamic Panel Height */
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Fix Content Clipping */
     transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
     border-left: 4px solid var(--accent);
 }
@@ -258,10 +260,11 @@ body {
 }
 
 .glass-card p {
-    color: var(--text-secondary);
+    color: #ffffff; /* White text for maximum readability */
     line-height: 1.8;
-    font-size: 1rem;
-    font-weight: 300;
+    font-size: 1.05rem; /* Larger text */
+    font-weight: 400;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .glass-card strong {

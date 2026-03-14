@@ -6,14 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const config = {
         scrollLength: 15000,
         cameraPath: [
-            { pos: new THREE.Vector3(0, 10, 100), look: new THREE.Vector3(0, 5, 0) },        // 0: Welcome
-            { pos: new THREE.Vector3(70, 15, -300), look: new THREE.Vector3(100, 5, -350) },  // 1: About
-            { pos: new THREE.Vector3(-100, 25, -700), look: new THREE.Vector3(-20, 15, -750) }, // 2: Skills
-            { pos: new THREE.Vector3(120, 50, -1100), look: new THREE.Vector3(120, 0, -1100) }, // 3: Experience
-            { pos: new THREE.Vector3(250, 20, -1500), look: new THREE.Vector3(300, 15, -1650) }, // 4: Projects
-            { pos: new THREE.Vector3(-200, 40, -1900), look: new THREE.Vector3(-250, 30, -2100) }, // 5: Education
-            { pos: new THREE.Vector3(60, 15, -2300), look: new THREE.Vector3(0, 10, -2500) },    // 6: Certs
-            { pos: new THREE.Vector3(0, 30, -2800), look: new THREE.Vector3(0, 15, -3000) }      // 7: Contact
+            { pos: new THREE.Vector3(0, 10, 180), look: new THREE.Vector3(0, 5, 0) },        // 0: Welcome (Moved back from 100 to 180)
+            { pos: new THREE.Vector3(100, 20, -250), look: new THREE.Vector3(100, 5, -350) },  // 1: About (Moved back)
+            { pos: new THREE.Vector3(-140, 35, -620), look: new THREE.Vector3(-20, 15, -750) }, // 2: Skills (Moved back from -100,25,-700)
+            { pos: new THREE.Vector3(120, 90, -950), look: new THREE.Vector3(120, 0, -1100) }, // 3: Experience (Moved back/up from 120,50,-1100)
+            { pos: new THREE.Vector3(300, 40, -1400), look: new THREE.Vector3(300, 15, -1650) }, // 4: Projects (Moved back)
+            { pos: new THREE.Vector3(-250, 60, -1800), look: new THREE.Vector3(-250, 30, -2100) }, // 5: Education (Moved back)
+            { pos: new THREE.Vector3(90, 30, -2200), look: new THREE.Vector3(0, 10, -2500) },    // 6: Certs (Moved back)
+            { pos: new THREE.Vector3(0, 50, -2700), look: new THREE.Vector3(0, 15, -3000) }      // 7: Contact (Moved back)
         ],
         zoneColors: [
             { bg: 0x020617, fog: 0x020617, accent: 0xa855f7 },
@@ -204,23 +204,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const techPlanet = new THREE.Group();
     techPlanet.position.copy(config.cameraPath[2].look);
     techPlanet.add(new THREE.Mesh(new THREE.SphereGeometry(30, 32, 32), new THREE.MeshStandardMaterial({ color: 0x06b6d4, wireframe: true, emissive: 0x3b82f6, emissiveIntensity: 1.2 })));
+    
+    // 1. ADD MAIN SKILLS PANEL (closer to camera, faces camera, no depth test)
+    const skillCanvas = document.createElement('canvas');
+    const sCtx = skillCanvas.getContext('2d');
+    skillCanvas.width = 512; skillCanvas.height = 256;
+    sCtx.shadowColor = '#ffffff'; sCtx.shadowBlur = 25; // White glow for max readability
+    sCtx.fillStyle = '#ffffff'; sCtx.font = 'bold 64px Orbitron';
+    sCtx.textAlign = 'center'; sCtx.textBaseline = 'middle';
+    sCtx.fillText('SKILLS PLANET', 256, 128);
+    const skillTex = new THREE.CanvasTexture(skillCanvas);
+    const mainSkillsPanel = new THREE.Sprite(new THREE.SpriteMaterial({ 
+        map: skillTex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+    }));
+    mainSkillsPanel.scale.set(80, 40, 1);
+    mainSkillsPanel.position.set(-50, 60, 20); // Moved closer to camera path and directly in front
+    techPlanet.add(mainSkillsPanel);
+
     const skillList = ['Java', 'HTML', 'CSS', 'JS', 'JSP', 'MySQL', 'Android', 'GitHub'];
     skillList.forEach((skill, i) => {
         const sphere = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 16), new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0xa855f7, emissiveIntensity: 2 }));
         const angle = (i / skillList.length) * Math.PI * 2;
-        sphere.position.set(Math.cos(angle) * 60, Math.sin(angle) * 60, (Math.random()-0.5)*40);
+        sphere.position.set(Math.cos(angle) * 70, Math.sin(angle) * 70, (Math.random()-0.5)*40); // Increased orbit
         
         // Add skill label
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = 128; canvas.height = 64;
-        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px Orbitron';
+        canvas.width = 256; canvas.height = 128;
+        ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20; // Improved lighting and contrast
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Orbitron'; // White text, larger font
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(skill, 64, 32);
+        ctx.fillText(skill, 128, 64);
         const tex = new THREE.CanvasTexture(canvas);
-        const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 }));
-        label.scale.set(4, 2, 1);
-        label.position.set(0, 10, 0);
+        const label = new THREE.Sprite(new THREE.SpriteMaterial({ 
+            map: tex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+        }));
+        label.scale.set(12, 6, 1); // Increased panel size
+        label.position.set(0, 15, 0);
         sphere.add(label);
         
         techPlanet.add(sphere);
@@ -243,20 +263,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 512; canvas.height = 256;
-        ctx.fillStyle = 'rgba(10, 10, 25, 0.8)';
-        ctx.fillRect(0, 0, 512, 256);
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5;
-        ctx.strokeRect(10, 10, 492, 236);
-        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Orbitron';
+        ctx.clearRect(0, 0, 512, 256);
+        ctx.shadowColor = '#ffffff'; // White glow
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 48px Orbitron'; // White text
         ctx.textAlign = 'center';
-        ctx.fillText(p.title, 256, 100);
-        ctx.font = '28px Orbitron';
-        ctx.fillText(p.tech, 256, 180);
+        ctx.fillText(p.title, 256, 110);
+        ctx.font = '30px Orbitron';
+        ctx.fillText(p.tech, 256, 170);
         
         const tex = new THREE.CanvasTexture(canvas);
-        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 }));
-        sprite.scale.set(60, 30, 1);
-        sprite.position.set(p.pos[0], p.pos[1] + 30, p.pos[2]);
+        // depthTest false and fog false for visibility overrides
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+            map: tex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+        }));
+        sprite.scale.set(70, 35, 1); // Increased panel size
+        sprite.position.set(p.pos[0], p.pos[1] + 40, p.pos[2]); // Adjusted height slightly
         city.add(sprite);
     });
     scene.add(city);
@@ -267,25 +289,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const educationData = [
         { title: 'Zeal Polytechnic', sub: 'Diploma in Computer Eng.', pos: [0, 80, 0] },
         { title: 'Achievements', sub: 'Hackathons & Presentations', pos: [80, 40, -40] },
-        { title: 'Focus Areas', sub: 'Java, Full Stack, Android', pos: [-80, 50, 40] }
+        { title: 'Focus Areas', sub: 'Web Dev, Java, UI', pos: [-80, 50, 40] }
     ];
     educationData.forEach(e => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 512; canvas.height = 256;
-        ctx.fillStyle = 'rgba(10, 10, 25, 0.8)';
-        ctx.fillRect(0, 0, 512, 256);
-        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 5;
-        ctx.strokeRect(10, 10, 492, 236);
-        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Orbitron';
+        ctx.clearRect(0, 0, 512, 256);
+        ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 25; // White glow
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 48px Orbitron';
         ctx.textAlign = 'center';
-        ctx.fillText(e.title, 256, 100);
-        ctx.font = '24px Orbitron';
-        ctx.fillText(e.sub, 256, 180);
+        ctx.fillText(e.title, 256, 110);
+        ctx.font = '28px Orbitron';
+        ctx.fillText(e.sub, 256, 170);
         
         const tex = new THREE.CanvasTexture(canvas);
-        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 }));
-        sprite.scale.set(60, 30, 1);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+            map: tex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+        }));
+        sprite.scale.set(70, 35, 1); // Increased scale
         sprite.position.set(...e.pos);
         academicSymbols.add(sprite);
     });
@@ -317,14 +339,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if(i < certLabels.length) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 256; canvas.height = 64;
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px Orbitron';
+            canvas.width = 512; canvas.height = 128;
+            ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 25; // White glow
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 48px Orbitron';
             ctx.textAlign = 'center';
-            ctx.fillText(certLabels[i], 128, 40);
+            ctx.fillText(certLabels[i], 256, 80);
             const tex = new THREE.CanvasTexture(canvas);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 1 }));
-            sprite.scale.set(30, 7.5, 1);
-            sprite.position.copy(crystal.position).add(new THREE.Vector3(0, 25, 0));
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+                map: tex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+            }));
+            sprite.scale.set(50, 12.5, 1); // Increased scale
+            sprite.position.copy(crystal.position).add(new THREE.Vector3(0, 30, 0)); // Move up slightly
             crystals.add(sprite);
         }
     }
@@ -354,25 +379,37 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const thankYouCanvas = document.createElement('canvas');
     const tyCtx = thankYouCanvas.getContext('2d');
-    thankYouCanvas.width = 1024; thankYouCanvas.height = 512;
+    thankYouCanvas.width = 1400; thankYouCanvas.height = 1024; // Increased width to prevent clipping
     tyCtx.fillStyle = 'rgba(255, 255, 255, 0)'; 
-    tyCtx.fillRect(0, 0, 1024, 512);
+    tyCtx.fillRect(0, 0, 1400, 1024);
     
-    tyCtx.shadowColor = '#ec4899'; tyCtx.shadowBlur = 40;
-    tyCtx.fillStyle = '#ffffff'; tyCtx.font = 'bold 64px Orbitron';
+    // Core Line 1: THANK YOU FOR VISITING
+    tyCtx.shadowColor = '#ffffff'; tyCtx.shadowBlur = 40;
+    tyCtx.fillStyle = '#ffffff'; tyCtx.font = 'bold 80px Orbitron'; // Increased font weight/size
     tyCtx.textAlign = 'center';
-    tyCtx.fillText('THANK YOU FOR VISITING MY PORTFOLIO', 512, 120);
+    tyCtx.fillText('THANK YOU FOR VISITING', 700, 300); // 700 is the horizontal center
     
-    tyCtx.font = 'bold 50px Orbitron'; tyCtx.fillStyle = '#a855f7';
-    tyCtx.fillText('Prachi Suhas Pawar', 512, 260);
+    // Line 2: MY PORTFOLIO
+    tyCtx.font = 'bold 70px Orbitron';
+    tyCtx.fillText('MY PORTFOLIO', 700, 420);
     
+    // Line 3: Prachi Suhas Pawar
+    tyCtx.shadowColor = 'transparent'; // Remove glow from lower text to make the top prominent
+    tyCtx.font = 'bold 50px Orbitron'; tyCtx.fillStyle = '#ffffff'; // Changed to white as requested
+    tyCtx.fillText('Prachi Suhas Pawar', 700, 580);
+    
+    // Line 4: Future Software Engineer
     tyCtx.font = '32px Orbitron'; tyCtx.fillStyle = '#ffffff';
-    tyCtx.fillText('Future Software Engineer', 512, 340);
+    tyCtx.fillText('Future Software Engineer', 700, 660);
     
     const tyTex = new THREE.CanvasTexture(thankYouCanvas);
-    const tySprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tyTex, transparent: true, opacity: 1 }));
-    tySprite.scale.set(160, 80, 1);
-    tySprite.position.set(0, 110, -50); // Floating high and in front
+    const tySprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+        map: tyTex, transparent: true, opacity: 1, depthTest: false, depthWrite: false, fog: false 
+    }));
+    // Adjusted scale to maintain proportions with the new 1400x1024 canvas
+    tySprite.scale.set(246, 180, 1); // Slight increase in size for finale
+    // Positioned lower so it appears fully inside camera view
+    tySprite.position.set(0, -20, -50); 
     contactIcons.add(tySprite);
 
     const contactData = [
@@ -391,14 +428,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hudItems = [];
     const data = [
-        { title: 'WELCOME SKY ISLAND', content: '<strong>Prachi Suhas Pawar</strong><br>Java Full Stack Developer | Student at Zeal Polytechnic Pune.<br><br>Exploring the intersection of logic and creativity through code.', pos: config.cameraPath[0].look },
-        { title: 'HOLOGRAPHIC GARDEN', content: 'I specialize in Java environments, building scalable tools and Android apps. My goal is to craft digital experiences that solve real-world problems.', pos: config.cameraPath[1].look },
-        { title: 'SKILLS PLANET', content: '<strong>Dominant Skills:</strong><br>• Core Java, JSP, Spring Basics<br>• HTML, CSS, JavaScript (ES6+)<br>• MySQL, DBMS Optimization<br>• Android Studio & Git Workflow', pos: config.cameraPath[2].look },
+        { title: 'WELCOME SKY ISLAND', content: '<strong>Prachi Suhas Pawar</strong><br>Aspiring Software Developer | Student at Zeal Polytechnic Pune.<br><br>Exploring the intersection of logic and creativity through code.', pos: config.cameraPath[0].look },
+        { title: 'HOLOGRAPHIC GARDEN', content: 'I enjoy building websites and exploring modern web technologies. I like creating clean user interfaces and developing practical web-based solutions while continuously improving my programming skills.', pos: config.cameraPath[1].look },
+        { title: 'SKILLS PLANET', content: '<strong>Dominant Skills:</strong><br>• Core Java, JSP, Spring Basics<br>• HTML, CSS, JavaScript (ES6+)<br>• MySQL, DBMS Optimization<br>• Git Workflow', pos: config.cameraPath[2].look },
         { title: 'EXPERIENCE DATA SPIRE', content: '<strong>Mass Technologies (Intern)</strong><br>Jun 2025 - Sep 2025<br>Building responsive web applications and refining technical workflows in an agile environment.', pos: config.cameraPath[3].look },
         { title: 'PROJECT NEON CITY', content: '<div class="project-grid"><div class="project-card"><h4>SmartMart App</h4><p>QR-based shopping application that scans products, adds them to a cart, and generates a bill with payment integration.</p><small>Tech: Java, Android Studio, XML</small></div><div class="project-card"><h4>Student Feedback System</h4><p>Web-based feedback system where students can submit feedback and administrators can view reports.</p><small>Tech: JSP, HTML, CSS, JDBC, MySQL</small></div><div class="project-card"><h4>Messcode Website</h4><p>A platform where users can search nearby mess services, view menus, and register as mess owners or customers.</p><small>Tech: JSP, HTML, CSS, MySQL</small></div><div class="project-card"><h4>HelpReach Project</h4><p>A social platform designed to help people connect with support services such as emergency help and donations.</p><small>Tech: Web technologies, Backend integration</small></div></div>', pos: config.cameraPath[4].look },
-        { title: 'ACADEMIC FLOATING ISLE', content: '<strong>Zeal Polytechnic, Pune</strong><br>Diploma in Computer Engineering<br><br><strong>Focus Areas:</strong><br>• Programming and Development<br>• Java, Full Stack Development, Android<br><br><strong>Achievements:</strong><br>• Active participation in hackathons<br>• Technical presentations<br>• Hands-on project development', pos: config.cameraPath[5].look },
-        { title: 'CRYSTAL GALLERY', content: '<div class="cert-grid"><div class="cert-card"><h4>Technical Workshops</h4><p>Attended various technical workshops on advanced programming and development practices.</p></div><div class="cert-card"><h4>Hackathon Participation</h4><p>Participated in multiple hackathons, showcasing problem-solving skills and teamwork.</p></div><div class="cert-card"><h4>Development Projects</h4><p>Completed numerous development projects demonstrating proficiency in Java Full Stack technologies.</p></div><div class="cert-card"><h4>Java Full Stack Learning</h4><p>Continuous learning and progress in Java Full Stack Development, including frameworks and best practices.</p></div></div>', pos: config.cameraPath[6].look },
-        { title: 'THE HEART PORTAL', content: '<div class="final-message"><div class="special-greeting"><h1>✨ THANK YOU FOR VISITING ✨</h1><p class="greeting-text">Your journey through my coding universe has come to an end...</p><p class="greeting-text">But the adventure continues!</p></div><h3>Prachi Suhas Pawar</h3><p>Future Software Engineer</p><div class="contact-info"><div class="contact-item"><span class="icon">📧</span><span>Email: prachipawar5133@gmail.com</span></div><div class="contact-item"><span class="icon">🐙</span><span>GitHub: prachi-pawar</span></div><div class="contact-item"><span class="icon">💼</span><span>LinkedIn: /in/prachipawar</span></div></div><button id="restart-journey-btn" class="btn-restart">Restart Journey</button><div class="auto-restart"><p>Returning to the beginning...</p><div class="loading-bar"><div class="loading-progress"></div></div></div></div>', pos: config.cameraPath[7].look }
+        { title: 'ACADEMIC FLOATING ISLE', content: '<strong>Zeal Polytechnic, Pune</strong><br>Diploma in Computer Engineering<br><br><strong>Focus Areas:</strong><br>• Programming and Web Development<br>• Java, Full Stack Development<br><br><strong>Achievements:</strong><br>• Active participation in hackathons<br>• Technical presentations<br>• Hands-on project development', pos: config.cameraPath[5].look },
+        { title: 'CRYSTAL GALLERY', content: '<div class="cert-grid"><div class="cert-card"><h4>Technical Workshops</h4><p>Attended various technical workshops on advanced programming and development practices.</p></div><div class="cert-card"><h4>Hackathon Participation</h4><p>Participated in multiple hackathons, showcasing problem-solving skills and teamwork.</p></div><div class="cert-card"><h4>Web Projects</h4><p>Completed numerous development projects demonstrating proficiency in web technologies.</p></div><div class="cert-card"><h4>Continuous Learning</h4><p>Continuous learning and progress in software development, including frameworks and best practices.</p></div></div>', pos: config.cameraPath[6].look },
+        { title: 'THE HEART PORTAL', content: '<div class="final-message"><div class="special-greeting"><h1>✨ THANK YOU FOR VISITING ✨</h1><p class="greeting-text">Your journey through my coding universe has come to an end...</p><p class="greeting-text">But the adventure continues!</p></div><h3>Prachi Suhas Pawar</h3><p>Aspiring Software Developer</p><div class="contact-info"><div class="contact-item"><span class="icon">📧</span><span>Email: prachipawar5133@gmail.com</span></div><div class="contact-item"><span class="icon">🐙</span><span>GitHub: prachi-pawar</span></div><div class="contact-item"><span class="icon">💼</span><span>LinkedIn: /in/prachipawar</span></div></div><button id="restart-journey-btn" class="btn-restart">Restart Journey</button><div class="auto-restart"><p>Returning to the beginning...</p><div class="loading-bar"><div class="loading-progress"></div></div></div></div>', pos: config.cameraPath[7].look }
     ];
 
     data.forEach(item => {
@@ -466,17 +503,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         hudItems.forEach((item, i) => {
             const dist = camera.position.distanceTo(item.pos);
-            const isLookingAt = dist < 700;
+            const isLookingAt = dist < 1200; // Increased visibility trigger range
             const isCurrent = (i === activeZone);
             
             if (isCurrent && isLookingAt) {
-                // Position the HUD item in front of the camera, slightly offset towards the target
-                const direction = item.pos.clone().sub(camera.position).normalize();
-                const offsetPos = camera.position.clone().add(direction.multiplyScalar(80));
-                const vector = offsetPos.project(camera);
-                
-                item.element.style.left = `${(vector.x * 0.5 + 0.5) * window.innerWidth}px`;
-                item.element.style.top = `${(-(vector.y * 0.5) + 0.5) * window.innerHeight}px`;
+                // Position the HUD item in front of the camera, directly in center viewing direction
+                item.element.style.left = `50%`;
+                item.element.style.top = `50%`;
                 item.element.classList.add('active');
             } else {
                 item.element.classList.remove('active');
