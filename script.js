@@ -229,35 +229,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const city = new THREE.Group();
     city.position.copy(config.cameraPath[4].look);
-    const buildings = [
-        { color: 0xec4899, size: [25, 100, 25], pos: [0, 0, 0] },
-        { color: 0x3b82f6, size: [20, 70, 20], pos: [60, 0, -40] },
-        { color: 0x06b6d4, size: [30, 50, 30], pos: [-70, 0, 50] },
-        { color: 0xa855f7, size: [22, 80, 22], pos: [40, 0, 60] }
+    const projectData = [
+        { title: 'SmartMart App', tech: 'Java, Android', color: 0xec4899, pos: [0, 80, 0] },
+        { title: 'Feedback System', tech: 'JSP, MySQL', color: 0x3b82f6, pos: [100, 60, -80] },
+        { title: 'Messcode Web', tech: 'JSP, CSS', color: 0x06b6d4, pos: [-120, 70, 90] },
+        { title: 'HelpReach', tech: 'Web Tech', color: 0xa855f7, pos: [80, 90, 120] }
     ];
-    buildings.forEach(b => {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(...b.size), new THREE.MeshStandardMaterial({ color: 0x020617, emissive: b.color, wireframe: true }));
-        mesh.position.set(...b.pos);
+    projectData.forEach(p => {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(40, 150, 40), new THREE.MeshStandardMaterial({ color: 0x020617, emissive: p.color, wireframe: true, emissiveIntensity: 2 }));
+        mesh.position.set(p.pos[0], 0, p.pos[2]);
         city.add(mesh);
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 512; canvas.height = 256;
+        ctx.fillStyle = 'rgba(10, 10, 25, 0.8)';
+        ctx.fillRect(0, 0, 512, 256);
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5;
+        ctx.strokeRect(10, 10, 492, 236);
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.title, 256, 100);
+        ctx.font = '28px Orbitron';
+        ctx.fillText(p.tech, 256, 180);
+        
+        const tex = new THREE.CanvasTexture(canvas);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 }));
+        sprite.scale.set(60, 30, 1);
+        sprite.position.set(p.pos[0], p.pos[1] + 30, p.pos[2]);
+        city.add(sprite);
     });
     scene.add(city);
 
-    // Academic Symbols
+    // ACADEMIC ISLE (EDUCATION)
     const academicSymbols = new THREE.Group();
     academicSymbols.position.copy(config.cameraPath[5].look);
-    const symbols = ['🎓', '📚', '🏆', '📖', '🔬'];
-    symbols.forEach((symbol, i) => {
+    const educationData = [
+        { title: 'Zeal Polytechnic', sub: 'Diploma in Computer Eng.', pos: [0, 80, 0] },
+        { title: 'Achievements', sub: 'Hackathons & Presentations', pos: [80, 40, -40] },
+        { title: 'Focus Areas', sub: 'Java, Full Stack, Android', pos: [-80, 50, 40] }
+    ];
+    educationData.forEach(e => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = 64; canvas.height = 64;
-        ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 48px Arial';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(symbol, 32, 32);
+        canvas.width = 512; canvas.height = 256;
+        ctx.fillStyle = 'rgba(10, 10, 25, 0.8)';
+        ctx.fillRect(0, 0, 512, 256);
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 5;
+        ctx.strokeRect(10, 10, 492, 236);
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText(e.title, 256, 100);
+        ctx.font = '24px Orbitron';
+        ctx.fillText(e.sub, 256, 180);
+        
         const tex = new THREE.CanvasTexture(canvas);
-        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.8 }));
-        sprite.scale.set(3, 3, 1);
-        const angle = (i / symbols.length) * Math.PI * 2;
-        sprite.position.set(Math.cos(angle) * 80, Math.sin(angle) * 80 + 30, (Math.random()-0.5)*40);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 }));
+        sprite.scale.set(60, 30, 1);
+        sprite.position.set(...e.pos);
         academicSymbols.add(sprite);
     });
     scene.add(academicSymbols);
@@ -265,23 +294,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // Crystal Gallery (Refined)
     const crystals = new THREE.Group();
     crystals.position.copy(config.cameraPath[6].look);
+    const certLabels = ['Hackathons', 'Workshops', 'Java Full Stack', 'Development'];
     for(let i=0; i<30; i++) {
-        const type = Math.floor(Math.random() * 3);
+        const type = Math.floor(Math.random() * 4);
         let geo;
-        if(type === 0) geo = new THREE.OctahedronGeometry(4, 0);
-        else if(type === 1) geo = new THREE.IcosahedronGeometry(4, 0);
-        else geo = new THREE.TetrahedronGeometry(4, 0);
+        if(type === 0) geo = new THREE.OctahedronGeometry(6, 0);
+        else if(type === 1) geo = new THREE.IcosahedronGeometry(6, 0);
+        else if(type === 2) geo = new THREE.TetrahedronGeometry(6, 0);
+        else geo = new THREE.BoxGeometry(20, 30, 2); 
         
         const crystal = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ 
             color: config.zoneColors[6].accent, 
             emissive: config.zoneColors[6].accent, 
-            emissiveIntensity: 2, 
+            emissiveIntensity: 3, 
             transparent: true, 
-            opacity: 0.8 
+            opacity: 0.9 
         }));
-        crystal.position.set(THREE.MathUtils.randFloatSpread(250), THREE.MathUtils.randFloatSpread(150), THREE.MathUtils.randFloatSpread(250));
+        crystal.position.set(THREE.MathUtils.randFloatSpread(400), THREE.MathUtils.randFloatSpread(250), THREE.MathUtils.randFloatSpread(400));
         crystal.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
         crystals.add(crystal);
+        
+        if(i < certLabels.length) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 64;
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText(certLabels[i], 128, 40);
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 1 }));
+            sprite.scale.set(30, 7.5, 1);
+            sprite.position.copy(crystal.position).add(new THREE.Vector3(0, 25, 0));
+            crystals.add(sprite);
+        }
     }
     scene.add(crystals);
 
@@ -300,16 +345,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     scene.add(lightBeams);
 
-    // Finale "Sparkles" (Interesting Thing!)
     const sparkles = new THREE.Group();
-    for(let i=0; i<150; i++) {
-        const p = new THREE.Mesh(new THREE.IcosahedronGeometry(0.6, 0), new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 3 }));
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 50 + Math.random() * 30;
-        p.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius + 20, -3000 + (Math.random()-0.5)*100);
-        sparkles.add(p);
-    }
     scene.add(sparkles);
+    
+    // PORTAL TEMPLE (CONTACT) - Redesigned 3D Finale Message
+    const contactIcons = new THREE.Group();
+    contactIcons.position.set(0, 25, -2900); // In front of the portal at -3000
+    
+    const thankYouCanvas = document.createElement('canvas');
+    const tyCtx = thankYouCanvas.getContext('2d');
+    thankYouCanvas.width = 1024; thankYouCanvas.height = 512;
+    tyCtx.fillStyle = 'rgba(255, 255, 255, 0)'; 
+    tyCtx.fillRect(0, 0, 1024, 512);
+    
+    tyCtx.shadowColor = '#ec4899'; tyCtx.shadowBlur = 40;
+    tyCtx.fillStyle = '#ffffff'; tyCtx.font = 'bold 64px Orbitron';
+    tyCtx.textAlign = 'center';
+    tyCtx.fillText('THANK YOU FOR VISITING MY PORTFOLIO', 512, 120);
+    
+    tyCtx.font = 'bold 50px Orbitron'; tyCtx.fillStyle = '#a855f7';
+    tyCtx.fillText('Prachi Suhas Pawar', 512, 260);
+    
+    tyCtx.font = '32px Orbitron'; tyCtx.fillStyle = '#ffffff';
+    tyCtx.fillText('Future Software Engineer', 512, 340);
+    
+    const tyTex = new THREE.CanvasTexture(thankYouCanvas);
+    const tySprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tyTex, transparent: true, opacity: 1 }));
+    tySprite.scale.set(160, 80, 1);
+    tySprite.position.set(0, 110, -50); // Floating high and in front
+    contactIcons.add(tySprite);
+
+    const contactData = [
+        { char: '📧', pos: [-60, 50, 0], color: 0x3b82f6 },
+        { char: '🐙', pos: [60, 50, 0], color: 0xffffff },
+        { char: '💼', pos: [0, 90, 0], color: 0x06b6d4 }
+    ];
+    contactData.forEach(d => {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(10, 0.8, 16, 100), new THREE.MeshStandardMaterial({ color: d.color, emissive: d.color, emissiveIntensity: 5 }));
+        ring.position.set(...d.pos); contactIcons.add(ring);
+    });
+    scene.add(contactIcons);
 
     const curve = new THREE.CatmullRomCurve3(config.cameraPath.map(c => c.pos));
     const lookCurve = new THREE.CatmullRomCurve3(config.cameraPath.map(c => c.look));
@@ -335,6 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let portalTriggered = false;
+    let activeZone = 0;
 
     let scrollProgress = 0;
     let isJourneyStarted = false;
@@ -344,15 +420,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.4, 0.8);
     composer.addPass(bloomPass);
 
-    document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('start-journey').addEventListener('click', () => {
         if(isJourneyStarted) return;
         isJourneyStarted = true;
+        
+        window.scrollTo(0, 0);
+        
         document.getElementById('welcome-screen').classList.add('fade-out');
         document.getElementById('game-hud').classList.remove('hidden');
         document.body.style.height = config.scrollLength + 'px';
         ScrollTrigger.refresh();
         gsap.to(window, { scrollTo: 100, duration: 2, ease: "power2.inOut" });
-        startAmbient();
     });
 
     ScrollTrigger.create({
@@ -369,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetLook = lookCurve.getPoint(t);
         
         // Cinematic Deceleration near zones
-        const activeZone = Math.floor(t * 8);
+        activeZone = Math.floor(t * 8);
         const lerpToZone = (t * 8) % 1;
         let lerpSpeed = 0.06;
         if (lerpToZone > 0.8 || lerpToZone < 0.2) lerpSpeed = 0.03; // Slow down near key points
@@ -496,32 +574,57 @@ document.addEventListener('DOMContentLoaded', () => {
             guide.group.scale.set(1, 1, 1);
         }
 
-        // Guide Interaction: Point towards active content
-        if (activeZone >= 0 && activeZone < hudItems.length) {
-            const target = hudItems[activeZone].pos;
-            guide.group.lookAt(target);
-        }
-        
-        composer.render();
-    }
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        composer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    animate();
-
-        });
-    });
-
-    // Restart Button Handler
-    document.addEventListener('click', (e) => {
-        if(e.target.id === 'restart-journey-btn') {
-            gsap.to(window, { scrollTo: 0, duration: 2, ease: "power2.inOut" });
-            setTimeout(() => location.reload(), 2100);
-        }
-    });
-});
+         // Spotlight Effect based on active zone
+         const zoneGroups = [null, techPlanet, techPlanet, techPlanet, city, academicSymbols, crystals, contactIcons];
+         zoneGroups.forEach((group, i) => {
+             if (group) {
+                 const isActive = (i === activeZone);
+                 group.scale.lerp(new THREE.Vector3(isActive ? 1.05 : 1, isActive ? 1.05 : 1, isActive ? 1.05 : 1), 0.1);
+                 group.traverse(child => {
+                     if (child.material && child.material.emissiveIntensity !== undefined) {
+                         const baseIntensity = (child.type === 'Sprite' ? 1 : 2);
+                         child.material.emissiveIntensity = THREE.MathUtils.lerp(child.material.emissiveIntensity, isActive ? baseIntensity * 2.5 : baseIntensity, 0.05);
+                     }
+                 });
+             }
+         });
+ 
+         // Camera-Facing Logic & Floating Animation for all info sprites
+         [city, academicSymbols, crystals, contactIcons, techPlanet].forEach(group => {
+             group.traverse(child => {
+                 if (child.type === 'Sprite') {
+                     child.lookAt(camera.position);
+                 }
+             });
+         });
+ 
+         composer.render();
+     }
+ 
+     window.addEventListener('resize', () => {
+         camera.aspect = window.innerWidth / window.innerHeight;
+         camera.updateProjectionMatrix();
+         renderer.setSize(window.innerWidth, window.innerHeight);
+         composer.setSize(window.innerWidth, window.innerHeight);
+     });
+ 
+     animate();
+ 
+     // Mission Map Clicks
+     document.querySelectorAll('#hud-menu li').forEach(li => {
+         li.addEventListener('click', () => {
+             if(!isJourneyStarted) return;
+             const zoneIndex = parseInt(li.dataset.zone);
+             const progress = (zoneIndex / 7); 
+             gsap.to(window, { scrollTo: progress * (document.body.scrollHeight - window.innerHeight), duration: 2.5, ease: "power2.inOut" });
+         });
+     });
+ 
+     // Restart Button Handler
+     document.addEventListener('click', (e) => {
+         if(e.target.id === 'restart-journey-btn') {
+             gsap.to(window, { scrollTo: 0, duration: 2, ease: "power2.inOut" });
+             setTimeout(() => location.reload(), 2100);
+         }
+     });
+ });
